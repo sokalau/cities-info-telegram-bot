@@ -1,4 +1,4 @@
-package com.sokolov.citiesinfotelegrambot.model;
+package com.sokolov.touristtelegrambot.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

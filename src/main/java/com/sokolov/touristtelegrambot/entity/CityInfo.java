@@ -1,4 +1,4 @@
-package com.sokolov.citiesinfotelegrambot.model.entity;
+package com.sokolov.touristtelegrambot.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,13 +15,18 @@ public class CityInfo {
     @Column(name = "id", nullable = false)
     private int id;
 
-    @Column(name = "description")
-    private String description;
-
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description")
+    private String description;
+
     public CityInfo() {
+    }
+
+    public CityInfo(String name, String description) {
+        this.name = name;
+        this.description = description;
     }
 
     public int getId() {

@@ -1,16 +1,13 @@
-package com.sokolov.citiesinfotelegrambot.model;
+package com.sokolov.touristtelegrambot.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 
-public class User implements Serializable {
+public class Chat implements Serializable {
     private Long id;
 
-    @JsonProperty("is_bot")
-    private Boolean isBot;
-
-    @JsonProperty("first_name")
+    @JsonProperty("fist_name")
     private String firstName;
 
     @JsonProperty("last_name")
@@ -18,8 +15,7 @@ public class User implements Serializable {
 
     private String username;
 
-    @JsonProperty("language_code")
-    private String languageCode;
+    private String type;
 
     public Long getId() {
         return id;
@@ -27,18 +23,6 @@ public class User implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public boolean isBot() {
-        return isBot;
-    }
-
-    public Boolean getBot() {
-        return isBot;
-    }
-
-    public void setBot(Boolean bot) {
-        isBot = bot;
     }
 
     public String getFirstName() {
@@ -65,11 +49,11 @@ public class User implements Serializable {
         this.username = username;
     }
 
-    public String getLanguageCode() {
-        return languageCode;
+    public String getType() {
+        return type;
     }
 
-    public void setLanguageCode(String languageCode) {
-        this.languageCode = languageCode;
+    public void setType(String type) {
+        this.type = type;
     }
 }

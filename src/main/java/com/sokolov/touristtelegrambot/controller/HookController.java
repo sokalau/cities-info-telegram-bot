@@ -1,7 +1,7 @@
-package com.sokolov.citiesinfotelegrambot.controller;
+package com.sokolov.touristtelegrambot.controller;
 
-import com.sokolov.citiesinfotelegrambot.model.Update;
-import com.sokolov.citiesinfotelegrambot.service.TelegramBotService;
+import com.sokolov.touristtelegrambot.model.Update;
+import com.sokolov.touristtelegrambot.service.TelegramBotService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

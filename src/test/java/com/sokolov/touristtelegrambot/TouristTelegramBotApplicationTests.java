@@ -1,10 +1,10 @@
-package com.sokolov.citiesinfotelegrambot;
+package com.sokolov.touristtelegrambot;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CitiesInfoTelegramBotApplicationTests {
+class TouristTelegramBotApplicationTests {
     @Test
     void contextLoads() {
     }

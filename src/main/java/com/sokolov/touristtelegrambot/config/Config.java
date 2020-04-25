@@ -1,4 +1,4 @@
-package com.sokolov.citiesinfotelegrambot.config;
+package com.sokolov.touristtelegrambot.config;
 
 import com.pengrad.telegrambot.TelegramBot;
 import org.springframework.beans.factory.annotation.Value;

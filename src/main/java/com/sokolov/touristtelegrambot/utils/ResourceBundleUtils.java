@@ -1,4 +1,4 @@
-package com.sokolov.citiesinfotelegrambot.utils;
+package com.sokolov.touristtelegrambot.utils;
 
 import java.util.Locale;
 import java.util.ResourceBundle;

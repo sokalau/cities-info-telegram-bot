@@ -1,6 +1,6 @@
-CREATE DATABASE 'tg_bot';
+CREATE DATABASE 'tourist_telegram_bot';
 
-CREATE TABLE `tg_bot`.`city_info` (
+CREATE TABLE `tourist_telegram_bot`.`city_info` (
   `id` INT NOT NULL,
   `description` VARCHAR(45) NULL,
   `name` VARCHAR(45) NOT NULL,
