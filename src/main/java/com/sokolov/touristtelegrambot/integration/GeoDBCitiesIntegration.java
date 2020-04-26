@@ -1,7 +1,7 @@
 package com.sokolov.touristtelegrambot.integration;
 
-import com.sokolov.touristtelegrambot.model.CityDetails;
+import com.sokolov.touristtelegrambot.dto.geodbcities.CityDetailsResponse;
 
 public interface GeoDBCitiesIntegration {
-    CityDetails getCityDetails(String name);
+    CityDetailsResponse getCityDetails(String name);
 }

@@ -2,16 +2,15 @@ package com.sokolov.touristtelegrambot.service.impl;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.sokolov.touristtelegrambot.dto.telegram.Message;
+import com.sokolov.touristtelegrambot.dto.telegram.Update;
 import com.sokolov.touristtelegrambot.entity.CityInfo;
-import com.sokolov.touristtelegrambot.integration.GeoDBCitiesIntegration;
-import com.sokolov.touristtelegrambot.model.CityDetails;
-import com.sokolov.touristtelegrambot.model.Message;
-import com.sokolov.touristtelegrambot.model.Update;
 import com.sokolov.touristtelegrambot.repository.CityInfoRepository;
+import com.sokolov.touristtelegrambot.service.GeoDBCitiesService;
 import com.sokolov.touristtelegrambot.service.TelegramBotService;
-import com.sokolov.touristtelegrambot.utils.ResourceBundleUtils;
+import com.sokolov.touristtelegrambot.service.TranslateService;
+import com.sokolov.touristtelegrambot.util.ResourceBundleUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
@@ -19,19 +18,20 @@ import java.util.Locale;
 @Service
 public class DefaultTelegramBotService implements TelegramBotService {
     private static final String DEFAULT_MESSAGE_BUNDLE_KEY = "defaultMessage";
-
-    @Value("${defaultMessage}")
-    private String defaultMessage;
+    private static final String MESSAGES_BUNDLE = "Messages";
 
     private final TelegramBot bot;
     private final CityInfoRepository repository;
-    private final GeoDBCitiesIntegration geoDBCitiesIntegration;
+    private final TranslateService translateService;
+    private final GeoDBCitiesService geoDBCitiesService;
 
     public DefaultTelegramBotService(TelegramBot bot, CityInfoRepository repository,
-                                     GeoDBCitiesIntegration geoDBCitiesIntegration) {
+                                     TranslateService translateService,
+                                     GeoDBCitiesService geoDBCitiesService) {
         this.bot = bot;
         this.repository = repository;
-        this.geoDBCitiesIntegration = geoDBCitiesIntegration;
+        this.translateService = translateService;
+        this.geoDBCitiesService = geoDBCitiesService;
     }
 
     @Override
@@ -43,29 +43,44 @@ public class DefaultTelegramBotService implements TelegramBotService {
             String text = message.getText();
 
             if (chatId != null && StringUtils.isNoneBlank(text)) {
-                String preparedText = text.trim().toLowerCase();
+                String normalizedText = text.trim().toLowerCase();
+                String language = translateService.detectLanguage(normalizedText);
 
-                CityInfo cityInfo = repository.findByName(preparedText);
+                boolean isNeedToTranslate = translateService.isNeedToTranslate(normalizedText);
 
-                //TODO: integration with GeoDB Cities REST API
-                if (cityInfo == null) {
-                    CityDetails cityDetails = geoDBCitiesIntegration.getCityDetails(preparedText);
+                if (isNeedToTranslate) {
+                    String translated = translateService.translate(
+                            text, DefaultTranslateService.DEFAULT_LANGUAGE);
+                    if (StringUtils.isNotBlank(translated)) {
+                        normalizedText = translated;
+                    }
                 }
 
-                String answer = getAnswer(cityInfo, message.getFrom().getLanguageCode());
+                CityInfo cityInfo = repository.findByName(normalizedText);
+                String englishName = translateService.translate(
+                        normalizedText, DefaultTranslateService.ENGLISH_LANGUAGE);
+                String answer = getAnswer(englishName, cityInfo, language, isNeedToTranslate);
 
                 bot.execute(new SendMessage(chatId, answer));
             }
         }
     }
 
-    private String getAnswer(CityInfo cityInfo, String languageCode) {
+    private String getAnswer(String name, CityInfo cityInfo, String languageCode,
+                             boolean isNeedToTranslateDescription) {
         String answer = getDefaultMessage(languageCode);
 
         if (cityInfo != null) {
             String description = cityInfo.getDescription();
             if (StringUtils.isNotBlank(description)) {
-                answer = description;
+                answer = isNeedToTranslateDescription
+                        ? translateService.translate(description, languageCode)
+                        : description;
+            }
+        } else {
+            String geoDBCitiesDescription = geoDBCitiesService.getDescription(name, languageCode);
+            if (StringUtils.isNotBlank(geoDBCitiesDescription)) {
+                answer = geoDBCitiesDescription;
             }
         }
 
@@ -73,8 +88,7 @@ public class DefaultTelegramBotService implements TelegramBotService {
     }
 
     private String getDefaultMessage(String languageCode) {
-        return StringUtils.isNotBlank(languageCode)
-                ? ResourceBundleUtils.getMessage(DEFAULT_MESSAGE_BUNDLE_KEY, new Locale(languageCode))
-                : defaultMessage;
+        return ResourceBundleUtils.getMessage(
+                MESSAGES_BUNDLE, DEFAULT_MESSAGE_BUNDLE_KEY, new Locale(languageCode));
     }
 }

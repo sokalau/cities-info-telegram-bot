@@ -6,12 +6,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class Config {
+public class TelegramBotConfig {
     @Value("${bot.token}")
     private String token;
 
     @Bean
-    public TelegramBot telegramBot() {
+    public TelegramBot configureTelegramBot() {
         return new TelegramBot(token);
     }
 }
