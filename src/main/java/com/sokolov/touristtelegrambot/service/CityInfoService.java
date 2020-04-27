@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface CityInfoService {
-    void removeIfExists(String name);
+    String removeIfExists(String name);
 
     String addOrReplace(String name, String description);
 

@@ -19,6 +19,7 @@ import java.util.Map;
 public class CityInfoController {
     private static final String CITY_INFO = "cityInfo";
     private static final String MESSAGE = "message";
+    private static final String NO_INFO_MESSAGE = "There is no city information.";
 
     private final CityInfoService cityInfoService;
 
@@ -35,7 +36,7 @@ public class CityInfoController {
         return new ResponseEntity<>(body, status);
     }
 
-    @GetMapping(value = "/{name}")
+    @GetMapping(value = "/about/{name}")
     public ResponseEntity<?> getCityInfo(@PathVariable String name) {
         Map<String, Object> body = new HashMap<>();
         HttpStatus status = HttpStatus.OK;
@@ -44,7 +45,7 @@ public class CityInfoController {
         if (cityInfo != null) {
             body.put(CITY_INFO, cityInfo);
         } else {
-            body.put(MESSAGE, "There is no city information.");
+            body.put(MESSAGE, NO_INFO_MESSAGE);
         }
 
         return new ResponseEntity<>(body, status);
@@ -54,7 +55,8 @@ public class CityInfoController {
     public ResponseEntity<?> removeCityInfo(@PathVariable String name) {
         Map<String, Object> body = new HashMap<>();
         HttpStatus status = HttpStatus.OK;
-        cityInfoService.removeIfExists(name);
+        String message = cityInfoService.removeIfExists(name);
+        body.put(MESSAGE, message);
         return new ResponseEntity<>(body, status);
     }
 }

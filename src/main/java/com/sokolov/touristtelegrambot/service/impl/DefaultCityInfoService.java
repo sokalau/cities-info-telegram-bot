@@ -3,41 +3,56 @@ package com.sokolov.touristtelegrambot.service.impl;
 import com.sokolov.touristtelegrambot.entity.CityInfo;
 import com.sokolov.touristtelegrambot.repository.CityInfoRepository;
 import com.sokolov.touristtelegrambot.service.CityInfoService;
+import com.sokolov.touristtelegrambot.service.TranslateService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DefaultCityInfoService implements CityInfoService {
-    private final CityInfoRepository repository;
+    private static final String REPLACED_MESSAGE = "Description for '%s' has been replaced to '%s'.";
+    private static final String ADDED_MESSAGE = "New city '%s' has been added with '%s' description.";
+    private static final String INVALID_PARAMS_MESSAGE = "Invalid name and/or description parameters.";
+    private static final String NOT_EXISTS = "There is no such city information.";
+    private static final String DELETED_MESSAGE = "City information has been successfully deleted.";
 
-    public DefaultCityInfoService(CityInfoRepository repository) {
+    private final CityInfoRepository repository;
+    private final TranslateService translateService;
+
+    public DefaultCityInfoService(CityInfoRepository repository, TranslateService translateService) {
         this.repository = repository;
+        this.translateService = translateService;
     }
 
     @Override
-    public void removeIfExists(String name) {
-        repository.deleteByName(name);
+    public String removeIfExists(String name) {
+        String message = NOT_EXISTS;
+
+        if (repository.existsByName(name)){
+            repository.deleteByName(name);
+            message = DELETED_MESSAGE;
+        }
+
+        return message;
     }
 
     @Override
     public String addOrReplace(String name, String description) {
-        String message = "Name cannot be blank.";
+        String message = INVALID_PARAMS_MESSAGE;
 
-        if (StringUtils.isNotBlank(name)) {
-            CityInfo cityInfo = repository.findByName(name);
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(description)) {
+            String normalizedName = name.trim().toLowerCase();
+            String translatedName = translateService.translate(
+                    normalizedName, DefaultTranslateService.DEFAULT_LANGUAGE);
+            CityInfo cityInfo = repository.findByName(translatedName);
 
             if (cityInfo != null) {
-                if (StringUtils.isNoneBlank(description)) {
-                    cityInfo.setDescription(description);
-                    repository.save(cityInfo);
-                    message = "Old description has been replaced to -> " + description;
-                }
+                cityInfo.setDescription(description);
+                repository.save(cityInfo);
+                message = String.format(REPLACED_MESSAGE, translatedName, description);
             } else {
-                if (StringUtils.isNoneBlank(description)) {
-                    CityInfo newCityInfo = new CityInfo(name, description);
-                    repository.save(newCityInfo);
-                    message = "New description has been added -> " + description;
-                }
+                CityInfo newCityInfo = new CityInfo(translatedName, description);
+                repository.save(newCityInfo);
+                message = String.format(ADDED_MESSAGE, translatedName, description);
             }
         }
 
@@ -46,6 +61,15 @@ public class DefaultCityInfoService implements CityInfoService {
 
     @Override
     public CityInfo get(String name) {
-        return repository.findByName(name);
+        CityInfo cityInfo = null;
+
+        if (StringUtils.isNotBlank(name)) {
+            String normalizedName = name.trim().toLowerCase();
+            String translatedName = translateService.translate(
+                    normalizedName, DefaultTranslateService.DEFAULT_LANGUAGE);
+            cityInfo = repository.findByName(translatedName);
+        }
+
+        return cityInfo;
     }
 }
