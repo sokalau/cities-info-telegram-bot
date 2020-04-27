@@ -7,6 +7,8 @@ import com.sokolov.touristtelegrambot.service.TranslateService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
 public class DefaultCityInfoService implements CityInfoService {
     private static final String REPLACED_MESSAGE = "Description for '%s' has been replaced to '%s'.";
@@ -24,12 +26,16 @@ public class DefaultCityInfoService implements CityInfoService {
     }
 
     @Override
+    @Transactional
     public String removeIfExists(String name) {
         String message = NOT_EXISTS;
 
-        if (repository.existsByName(name)){
-            repository.deleteByName(name);
-            message = DELETED_MESSAGE;
+        if (StringUtils.isNotBlank(name)) {
+            String preparedName = prepareName(name);
+            if (repository.existsByName(preparedName)) {
+                repository.deleteByName(preparedName);
+                message = DELETED_MESSAGE;
+            }
         }
 
         return message;
@@ -40,19 +46,17 @@ public class DefaultCityInfoService implements CityInfoService {
         String message = INVALID_PARAMS_MESSAGE;
 
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(description)) {
-            String normalizedName = name.trim().toLowerCase();
-            String translatedName = translateService.translate(
-                    normalizedName, DefaultTranslateService.DEFAULT_LANGUAGE);
-            CityInfo cityInfo = repository.findByName(translatedName);
+            String preparedName = prepareName(name);
+            CityInfo cityInfo = repository.findByName(preparedName);
 
             if (cityInfo != null) {
                 cityInfo.setDescription(description);
                 repository.save(cityInfo);
-                message = String.format(REPLACED_MESSAGE, translatedName, description);
+                message = String.format(REPLACED_MESSAGE, preparedName, description);
             } else {
-                CityInfo newCityInfo = new CityInfo(translatedName, description);
+                CityInfo newCityInfo = new CityInfo(preparedName, description);
                 repository.save(newCityInfo);
-                message = String.format(ADDED_MESSAGE, translatedName, description);
+                message = String.format(ADDED_MESSAGE, preparedName, description);
             }
         }
 
@@ -64,12 +68,15 @@ public class DefaultCityInfoService implements CityInfoService {
         CityInfo cityInfo = null;
 
         if (StringUtils.isNotBlank(name)) {
-            String normalizedName = name.trim().toLowerCase();
-            String translatedName = translateService.translate(
-                    normalizedName, DefaultTranslateService.DEFAULT_LANGUAGE);
-            cityInfo = repository.findByName(translatedName);
+            String preparedName = prepareName(name);
+            cityInfo = repository.findByName(preparedName);
         }
 
         return cityInfo;
+    }
+
+    private String prepareName(String name) {
+        String normalizedName = name.trim().toLowerCase();
+        return translateService.translate(normalizedName, DefaultTranslateService.DEFAULT_LANGUAGE);
     }
 }
