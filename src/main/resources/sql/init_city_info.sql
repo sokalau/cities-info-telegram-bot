@@ -1,12 +1,3 @@
-CREATE DATABASE tourist_telegram_bot CHARACTER SET UTF8 COLLATE utf8_general_ci;
-
-CREATE TABLE `tourist_telegram_bot`.`city_info` (
-  `id` INT NOT NULL,
-  `description` TEXT NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
-   CONSTRAINT test_city_info_pk PRIMARY KEY (id)
-);
-
 INSERT INTO `tourist_telegram_bot`.`city_info`
 (`id`,
 `description`,
@@ -27,4 +18,3 @@ VALUES
 ('5',
 'Спортивный комплекс Неман - бомба',
 'гродно');
-

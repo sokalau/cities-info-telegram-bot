@@ -1,5 +1,9 @@
 package com.sokolov.touristtelegrambot.entity;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -7,6 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "city_info")
 public class CityInfo {
@@ -21,35 +28,8 @@ public class CityInfo {
     @Column(name = "description")
     private String description;
 
-    public CityInfo() {
-    }
-
     public CityInfo(String name, String description) {
         this.name = name;
         this.description = description;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

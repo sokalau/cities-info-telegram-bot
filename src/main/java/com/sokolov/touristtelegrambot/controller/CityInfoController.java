@@ -2,6 +2,7 @@ package com.sokolov.touristtelegrambot.controller;
 
 import com.sokolov.touristtelegrambot.entity.CityInfo;
 import com.sokolov.touristtelegrambot.service.CityInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,17 +22,18 @@ public class CityInfoController {
     private static final String MESSAGE = "message";
     private static final String NO_INFO_MESSAGE = "There is no city information.";
 
-    private final CityInfoService cityInfoService;
+    private final CityInfoService service;
 
-    public CityInfoController(CityInfoService cityInfoService) {
-        this.cityInfoService = cityInfoService;
+    @Autowired
+    public CityInfoController(CityInfoService service) {
+        this.service = service;
     }
 
     @PostMapping(value = "/add")
     public ResponseEntity<?> addCityInfo(String name, String description) {
         Map<String, Object> body = new HashMap<>();
-        HttpStatus status = HttpStatus.OK;
-        String message = cityInfoService.addOrReplace(name, description);
+        var status = HttpStatus.OK;
+        var message = service.addOrReplace(name, description);
         body.put(MESSAGE, message);
         return new ResponseEntity<>(body, status);
     }
@@ -39,9 +41,9 @@ public class CityInfoController {
     @GetMapping(value = "/about/{name}")
     public ResponseEntity<?> getCityInfo(@PathVariable String name) {
         Map<String, Object> body = new HashMap<>();
-        HttpStatus status = HttpStatus.OK;
+        var status = HttpStatus.OK;
 
-        CityInfo cityInfo = cityInfoService.get(name);
+        var cityInfo = service.get(name);
         if (cityInfo != null) {
             body.put(CITY_INFO, cityInfo);
         } else {
@@ -54,8 +56,8 @@ public class CityInfoController {
     @DeleteMapping(value = "/remove/{name}")
     public ResponseEntity<?> removeCityInfo(@PathVariable String name) {
         Map<String, Object> body = new HashMap<>();
-        HttpStatus status = HttpStatus.OK;
-        String message = cityInfoService.removeIfExists(name);
+        var status = HttpStatus.OK;
+        var message = service.removeIfExists(name);
         body.put(MESSAGE, message);
         return new ResponseEntity<>(body, status);
     }

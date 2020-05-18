@@ -1,10 +1,10 @@
-package com.sokolov.touristtelegrambot.service.impl;
+package com.sokolov.touristtelegrambot.service;
 
 import com.sokolov.touristtelegrambot.entity.CityInfo;
 import com.sokolov.touristtelegrambot.repository.CityInfoRepository;
-import com.sokolov.touristtelegrambot.service.CityInfoService;
-import com.sokolov.touristtelegrambot.service.TranslateService;
+import com.sokolov.touristtelegrambot.service.integration.yandex.YandexTranslateIntegration;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -18,20 +18,21 @@ public class DefaultCityInfoService implements CityInfoService {
     private static final String DELETED_MESSAGE = "City information has been successfully deleted.";
 
     private final CityInfoRepository repository;
-    private final TranslateService translateService;
+    private final YandexTranslateIntegration integration;
 
-    public DefaultCityInfoService(CityInfoRepository repository, TranslateService translateService) {
+    @Autowired
+    public DefaultCityInfoService(CityInfoRepository repository, YandexTranslateIntegration integration) {
         this.repository = repository;
-        this.translateService = translateService;
+        this.integration = integration;
     }
 
     @Override
     @Transactional
     public String removeIfExists(String name) {
-        String message = NOT_EXISTS;
+        var message = NOT_EXISTS;
 
         if (StringUtils.isNotBlank(name)) {
-            String preparedName = prepareName(name);
+            var preparedName = prepareName(name);
             if (repository.existsByName(preparedName)) {
                 repository.deleteByName(preparedName);
                 message = DELETED_MESSAGE;
@@ -43,18 +44,18 @@ public class DefaultCityInfoService implements CityInfoService {
 
     @Override
     public String addOrReplace(String name, String description) {
-        String message = INVALID_PARAMS_MESSAGE;
+        var message = INVALID_PARAMS_MESSAGE;
 
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(description)) {
-            String preparedName = prepareName(name);
-            CityInfo cityInfo = repository.findByName(preparedName);
+            var preparedName = prepareName(name);
+            var cityInfo = repository.findByName(preparedName);
 
             if (cityInfo != null) {
                 cityInfo.setDescription(description);
                 repository.save(cityInfo);
                 message = String.format(REPLACED_MESSAGE, preparedName, description);
             } else {
-                CityInfo newCityInfo = new CityInfo(preparedName, description);
+                var newCityInfo = new CityInfo(preparedName, description);
                 repository.save(newCityInfo);
                 message = String.format(ADDED_MESSAGE, preparedName, description);
             }
@@ -68,7 +69,7 @@ public class DefaultCityInfoService implements CityInfoService {
         CityInfo cityInfo = null;
 
         if (StringUtils.isNotBlank(name)) {
-            String preparedName = prepareName(name);
+            var preparedName = prepareName(name);
             cityInfo = repository.findByName(preparedName);
         }
 
@@ -76,7 +77,6 @@ public class DefaultCityInfoService implements CityInfoService {
     }
 
     private String prepareName(String name) {
-        String normalizedName = name.trim().toLowerCase();
-        return translateService.translate(normalizedName, DefaultTranslateService.DEFAULT_LANGUAGE);
+        return integration.translate(name.trim().toLowerCase(), "ru");
     }
 }
