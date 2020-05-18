@@ -4,17 +4,17 @@ Simple tourist Telegram bot is written on with Spring Boot
 @awesome_tourist_bot
 
 # How to set up the project
- - JDK 8
- - MySQL database. Configure datasource in application.properties (username, password, url). Then run init.sql to initialize database and insert some values
+ - JDK 11
+ - MySQL database. Configure datasource in application.yml (username, password, url). Then run sql scripts to configure database
  - Download Ngrok from [here](https://ngrok.com/download) and run it as follow,
 
 ```bash
 $ ./ngrok http 8080 -> then open localhost:4040 and copy https ngrok public url
 ```
- - Run ./setWebhook.sh (configure telegram token stored in application.properties and saved ngrok public url)
+ - Run ./setWebhook.sh (configure telegram token stored in application.yml and saved ngrok public url)
  
  # Telegram Bot Management:
- To manage cities information use next web interface (using english names for cities)
+ To manage cities information use next REST API
  - Add or replace: POST /cities/add name and description string params
  - Remove: DELETE /cities/remove/{name}
  - Read: GET /cities/about/{name}

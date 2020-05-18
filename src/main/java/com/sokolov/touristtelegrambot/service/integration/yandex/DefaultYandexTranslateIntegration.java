@@ -12,7 +12,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Service
 public class DefaultYandexTranslateIntegration implements YandexTranslateIntegration {
-    private static final String DETECT_LANGUAGE_URL
+    public static final String DETECT_LANGUAGE_URL
             = "https://translate.yandex.net/api/v1.5/tr.json/detect?key=%s&text=%s";
     private static final String TRANSLATE_TEXT_URL
             = "https://translate.yandex.net/api/v1.5/tr.json/translate?key=%s&text=%s&lang=%s";

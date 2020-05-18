@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
+import static com.sokolov.touristtelegrambot.service.integration.yandex.DefaultYandexTranslateIntegration.DETECT_LANGUAGE_URL;
+
 @Service
 public class DefaultCityInfoService implements CityInfoService {
     private static final String REPLACED_MESSAGE = "Description for '%s' has been replaced to '%s'.";
@@ -32,9 +34,9 @@ public class DefaultCityInfoService implements CityInfoService {
         var message = NOT_EXISTS;
 
         if (StringUtils.isNotBlank(name)) {
-            var preparedName = prepareName(name);
-            if (repository.existsByName(preparedName)) {
-                repository.deleteByName(preparedName);
+            var translatedName = translateName(name);
+            if (repository.existsByName(translatedName)) {
+                repository.deleteByName(translatedName);
                 message = DELETED_MESSAGE;
             }
         }
@@ -47,17 +49,17 @@ public class DefaultCityInfoService implements CityInfoService {
         var message = INVALID_PARAMS_MESSAGE;
 
         if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(description)) {
-            var preparedName = prepareName(name);
-            var cityInfo = repository.findByName(preparedName);
+            var translatedName = translateName(name);
+            var cityInfo = repository.findByName(translatedName);
 
             if (cityInfo != null) {
                 cityInfo.setDescription(description);
                 repository.save(cityInfo);
-                message = String.format(REPLACED_MESSAGE, preparedName, description);
+                message = String.format(REPLACED_MESSAGE, translatedName, description);
             } else {
-                var newCityInfo = new CityInfo(preparedName, description);
+                var newCityInfo = new CityInfo(translatedName, description);
                 repository.save(newCityInfo);
-                message = String.format(ADDED_MESSAGE, preparedName, description);
+                message = String.format(ADDED_MESSAGE, translatedName, description);
             }
         }
 
@@ -69,14 +71,14 @@ public class DefaultCityInfoService implements CityInfoService {
         CityInfo cityInfo = null;
 
         if (StringUtils.isNotBlank(name)) {
-            var preparedName = prepareName(name);
-            cityInfo = repository.findByName(preparedName);
+            var translatedName = translateName(name);
+            cityInfo = repository.findByName(translatedName);
         }
 
         return cityInfo;
     }
 
-    private String prepareName(String name) {
-        return integration.translate(name.trim().toLowerCase(), "ru");
+    private String translateName(String name) {
+        return integration.translate(name.trim().toLowerCase(), DETECT_LANGUAGE_URL);
     }
 }
